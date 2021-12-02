@@ -8,34 +8,26 @@ fn aoc1(w_size: usize) -> std::io::Result<()> {
     f.read_to_string(&mut buffer)?;
     let mut depths = buffer.lines().map(|l| l.parse::<i32>().unwrap());
 
-    let mut windows: Vec<i32> = vec![];
-
     let mut to_be_summed: Vec<i32> = depths.by_ref().take(w_size).collect();
     if to_be_summed.len() < w_size {
         panic!("should not happen yet");
     }
 
+    let mut prev_sum: i32 = to_be_summed.iter().sum();
+    let mut i = 0;
     loop {
-        windows.push(to_be_summed.iter().sum());
         to_be_summed.remove(0);
         match depths.next() {
             None => break,
             Some(x) => to_be_summed.push(x),
         }
-    }
-    let mut w = windows.into_iter();
-
-    let start_val = (0, w.next().unwrap());
-
-    let i = w.fold(start_val, |accum, v| {
-        let (i, prev) = accum;
-        if v > prev {
-            (i + 1, v)
-        } else {
-            (i, v)
+        let s = to_be_summed.iter().sum();
+        if s > prev_sum {
+            i += 1;
         }
-    });
-    println!("aoc1/{}: {}", w_size, i.0);
+        prev_sum = s
+    }
+    println!("aoc1/{}: {}", w_size, i);
     Ok(())
 }
 
