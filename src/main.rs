@@ -1,6 +1,11 @@
+#![allow(unused)]
+use core::fmt;
+use std::collections::HashMap;
+use std::fmt::Debug;
 use std::fs::File;
 use std::io::Read;
 use std::iter::Iterator;
+use std::ops::Rem;
 
 fn aoc1(w_size: usize) -> std::io::Result<()> {
     let mut f = File::open("d1.in")?;
@@ -177,8 +182,133 @@ fn aoc3() -> std::io::Result<()> {
 
     let oxy = recursive_filter(&numbers, width, false);
     let co2 = recursive_filter(&numbers, width, true);
+
     dbg!(oxy, co2, oxy * co2);
     Ok(())
+}
+
+struct BingoBoard {
+    size: usize,
+    numbers: Vec<Option<u64>>,
+}
+
+impl Debug for BingoBoard {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        for (i, n) in self.numbers.iter().enumerate() {
+            if i % self.size == 0 {
+                write!(f, "\n")?;
+            }
+            match n {
+                Some(n) => write!(f, "\t{} ", n)?,
+                None => write!(f, "\tXX")?,
+            };
+        }
+        write!(f, "\n\n")?;
+        Ok(())
+    }
+}
+
+impl BingoBoard {
+    fn new(lines: &mut std::str::Lines) -> BingoBoard {
+        let mut b = BingoBoard {
+            size: 0,
+            numbers: vec![],
+        };
+        for l in lines {
+            if l == "" {
+                break;
+            }
+            let vals: Vec<Option<u64>> = l
+                .split_ascii_whitespace()
+                .filter(|&x| !x.is_empty())
+                .map(|x| Some(x.parse::<u64>().unwrap()))
+                .collect();
+            b.size = vals.len();
+            b.numbers.extend_from_slice(vals.as_slice());
+        }
+        b
+    }
+    fn play(&mut self, n: u64) -> bool {
+        let mut rows: HashMap<usize, usize> = HashMap::new();
+        let mut columns: HashMap<usize, usize> = HashMap::new();
+        for i in 0..self.numbers.len() {
+            if self.numbers[i] == Some(n) {
+                self.numbers[i] = None;
+            }
+        }
+        for (i, v) in self.numbers.iter().enumerate() {
+            if *v == None {
+                let column = i.rem(self.size);
+                let new = columns.get(&column).unwrap_or(&self.size) - 1;
+                if new == 0 {
+                    println!("column {} is empty, won!", column);
+                    return true;
+                }
+                columns.insert(column, new);
+
+                let row = i / self.size;
+                let new = rows.get(&row).unwrap_or(&self.size) - 1;
+                if new == 0 {
+                    println!("row {} is empty, won!", row);
+                    return true;
+                }
+                rows.insert(row, new);
+            }
+        }
+        false
+    }
+    fn sum(&self) -> u64 {
+        self.numbers.iter().fold(0, |acc, item| match item {
+            Some(n) => acc + n,
+            None => acc,
+        })
+    }
+}
+
+fn aoc4() -> std::io::Result<()> {
+    let mut f = File::open("d4.in")?;
+    let mut buffer = String::new();
+    f.read_to_string(&mut buffer)?;
+    let mut lines = buffer.lines().into_iter();
+
+    let plays: Vec<u64> = lines
+        .next()
+        .unwrap()
+        .split(",")
+        .map(|x| x.parse::<u64>().unwrap())
+        .collect();
+    dbg!(&plays);
+    // skip over the newline
+    lines.next();
+
+    let mut boards: Vec<Box<BingoBoard>> = vec![];
+    loop {
+        let b = BingoBoard::new(&mut lines);
+        dbg!(&b);
+        if b.size == 0 {
+            break;
+        }
+        boards.push(Box::from(b));
+    }
+
+    play_bingo(plays, boards);
+
+    Ok(())
+}
+
+fn play_bingo(plays: Vec<u64>, mut boards: Vec<Box<BingoBoard>>) {
+    for p in &plays {
+        println!("playing {}", p);
+        for b in &mut boards {
+            let won = b.play(*p);
+            dbg!(&b);
+            if won {
+                println!("board won with play {}", *p);
+                println!("score = {}", *p * b.sum());
+                return;
+            }
+        }
+    }
 }
 
 fn main() -> std::io::Result<()> {
@@ -186,5 +316,6 @@ fn main() -> std::io::Result<()> {
     aoc1(3)?;
     aoc2()?;
     aoc3()?;
+    aoc4()?;
     Ok(())
 }
