@@ -31,16 +31,59 @@ impl Line {
                 grid.insert(p, prev_value);
             }
         } else if self.0 .0 == self.1 .1 {
-            println!("diagonal!{:?}", self);
+            let mut x = self.0 .0;
+            let mut y = self.0 .1;
+            loop {
+                let p = format!("{},{}", x, y);
+                let prev_value = grid.get(&p).unwrap_or(&0) + 1;
+                grid.insert(p, prev_value);
+                if x == self.1 .0 {
+                    break;
+                }
+                if self.0 .0 > self.0 .1 {
+                    x -= 1;
+                    y += 1;
+                } else {
+                    x += 1;
+                    y -= 1;
+                }
+            }
         } else {
-            println!("nope!, {:?}", self)
+            let slope: i32 =
+                (self.0 .0 as i32 - self.1 .0 as i32) / (self.0 .1 as i32 - self.1 .1 as i32);
+            if slope.abs() != 1 {
+                println!("nope!{:?}->{}", self, slope);
+                return;
+            }
+            println!("45 degree: {:?}, {}", self, slope);
+            let mut x = self.0 .0;
+            let mut y = self.0 .1;
+            let inc_x = self.0 .0 < self.1 .0;
+            let inc_y = self.0 .1 < self.1 .1;
+            loop {
+                let p = format!("{},{}", x, y);
+                let prev_value = grid.get(&p).unwrap_or(&0) + 1;
+                grid.insert(p, prev_value);
+                if x == self.1 .0 {
+                    break;
+                }
+                if inc_x {
+                    x += 1;
+                } else {
+                    x -= 1;
+                }
+                if inc_y {
+                    y += 1;
+                } else {
+                    y -= 1;
+                }
+            }
         };
     }
 }
 
 #[derive(Debug, PartialEq)]
 struct Point(u64, u64);
-
 impl Point {
     fn distance_from_origin_sq(&self) -> u64 {
         self.0.pow(2) * self.1.pow(2)
