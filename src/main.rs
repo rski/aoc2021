@@ -1,16 +1,12 @@
-#![allow(unused)]
 use core::fmt;
 use std::collections::HashMap;
 use std::fmt::Debug;
-use std::fs::File;
-use std::io::Read;
+use std::fs::read_to_string;
 use std::iter::Iterator;
 use std::ops::Rem;
 
 fn aoc1(w_size: usize) -> std::io::Result<()> {
-    let mut f = File::open("d1.in")?;
-    let mut buffer = String::new();
-    f.read_to_string(&mut buffer)?;
+    let buffer = read_to_string(String::from("d1.in"))?;
     let mut depths = buffer.lines().map(|l| l.parse::<i32>().unwrap());
 
     let mut window: Vec<i32> = depths.by_ref().take(w_size).collect();
@@ -41,9 +37,7 @@ struct Subnautica {
 }
 
 fn aoc2() -> std::io::Result<()> {
-    let mut f = File::open("d2.in")?;
-    let mut buffer = String::new();
-    f.read_to_string(&mut buffer)?;
+    let buffer = read_to_string(String::from("d2.in"))?;
     let directions = buffer.lines().map(|l| {
         let mut it = l.split_ascii_whitespace();
         let direction = it.next().unwrap();
@@ -85,11 +79,9 @@ fn aoc2() -> std::io::Result<()> {
 
 fn get_numbers(b: &String) -> (Vec<u64>, u64) {
     let mut numbers: Vec<u64> = vec![];
-    let mut lines = 0;
     let mut width = None;
     for l in b.lines() {
         let mut bp = Vec::<u8>::new();
-        lines += 1;
         for c in l.chars() {
             match c {
                 '0' => {
@@ -163,9 +155,7 @@ fn most_popular_bits_pattern(nums: &Vec<u64>, width: u64) -> Vec<bool> {
 }
 
 fn aoc3() -> std::io::Result<()> {
-    let mut f = File::open("d3.in")?;
-    let mut buffer = String::new();
-    f.read_to_string(&mut buffer)?;
+    let buffer = read_to_string(String::from("d3.in"))?;
     let (numbers, width) = get_numbers(&buffer);
     let vals = most_popular_bits_pattern(&numbers, width);
 
@@ -317,9 +307,7 @@ fn aoc4() -> std::io::Result<()> {
 }
 
 fn setup() -> Result<(Vec<u64>, Vec<Box<BingoBoard>>), std::io::Error> {
-    let mut f = File::open("d4.in")?;
-    let mut buffer = String::new();
-    f.read_to_string(&mut buffer)?;
+    let buffer = read_to_string(String::from("d4.in"))?;
     let mut lines = buffer.lines().into_iter();
     let plays: Vec<u64> = lines
         .next()
@@ -344,7 +332,7 @@ fn setup() -> Result<(Vec<u64>, Vec<Box<BingoBoard>>), std::io::Error> {
 fn play_bingo(plays: &Vec<u64>, boards: &mut Vec<Box<BingoBoard>>) {
     for p in plays {
         println!("playing {}", p);
-        for mut b in boards.iter_mut() {
+        for b in boards.iter_mut() {
             b.play(*p);
         }
     }
