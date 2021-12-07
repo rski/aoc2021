@@ -2,20 +2,16 @@ use std::{collections::HashMap, fs::read_to_string};
 
 fn produce(first_day: i64, mut cache: &mut HashMap<i64, usize>) -> usize {
     let mut i = 1;
-    let mut fishes = vec![];
+    let mut acc = 0;
     loop {
         let dob = i * 7 + first_day;
         if dob > 256 {
             break;
         }
         i += 1;
-        fishes.push(dob + 2)
+        acc += reproduce(dob + 2, &mut cache)
     }
-    fishes
-        .iter()
-        .fold(0, |acc, &f| acc + reproduce(f, &mut cache))
-        + i as usize
-        - 1
+    acc + i as usize - 1
 }
 
 fn reproduce(first_day: i64, mut cache: &mut HashMap<i64, usize>) -> usize {
