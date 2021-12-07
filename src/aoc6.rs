@@ -1,6 +1,6 @@
 use std::{collections::HashMap, fs::read_to_string};
 
-fn produce(first_day: i64) -> Vec<i64> {
+fn produce(first_day: i64, mut cache: &mut HashMap<i64, usize>) -> usize {
     let mut i = 1;
     let mut fishes = vec![];
     loop {
@@ -12,14 +12,17 @@ fn produce(first_day: i64) -> Vec<i64> {
         fishes.push(dob + 2)
     }
     fishes
+        .iter()
+        .fold(0, |acc, &f| acc + reproduce(f, &mut cache))
+        + i as usize
+        - 1
 }
 
 fn reproduce(first_day: i64, mut cache: &mut HashMap<i64, usize>) -> usize {
     match cache.get(&first_day) {
         Some(i) => *i,
         None => {
-            let x = produce(first_day);
-            let i = x.len() + x.iter().fold(0, |acc, &f| acc + reproduce(f, &mut cache));
+            let i = produce(first_day, &mut cache);
             cache.insert(first_day, i);
             i
         }
