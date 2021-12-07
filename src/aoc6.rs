@@ -2,23 +2,29 @@ use std::{collections::HashMap, fs::read_to_string};
 
 type Fish = i64;
 
-fn reproduce(first_day: i64, mut cache: &mut HashMap<i64, Vec<Fish>>) -> usize {
+fn produce(first_day: i64) -> Vec<Fish> {
     let mut i = 1;
-    let mut produce = || {
-        let mut fishes = vec![];
-        loop {
-            let dob = i * 7 + first_day;
-            if dob > 80 {
-                break;
-            }
-            i += 1;
-            fishes.push(dob + 2)
+    let mut fishes = vec![];
+    loop {
+        let dob = i * 7 + first_day;
+        if dob > 256 {
+            break;
         }
-        fishes
-    };
-    let fishes = produce();
-    let i: usize = fishes.iter().map(|&f| reproduce(f, &mut cache)).sum();
-    fishes.len() + i
+        i += 1;
+        fishes.push(dob + 2)
+    }
+    fishes
+}
+
+fn reproduce(first_day: i64, mut cache: &mut HashMap<i64, usize>) -> usize {
+    let i = cache.get(&first_day);
+    if i.is_some() {
+        return *i.unwrap();
+    }
+    let x = produce(first_day);
+    let i = x.len() + x.iter().map(|&f| reproduce(f, &mut cache)).sum::<usize>();
+    cache.insert(first_day, i);
+    i
 }
 
 fn main() -> std::io::Result<()> {
@@ -31,7 +37,7 @@ fn main() -> std::io::Result<()> {
         .collect();
     println!("Initial state: {:?}", state);
 
-    let mut cache = HashMap::<i64, Vec<Fish>>::new();
+    let mut cache = HashMap::<i64, usize>::new();
     let num_fishes: usize = state.len()
         + state
             .iter()
