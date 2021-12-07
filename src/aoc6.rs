@@ -15,14 +15,15 @@ fn produce(first_day: i64) -> Vec<i64> {
 }
 
 fn reproduce(first_day: i64, mut cache: &mut HashMap<i64, usize>) -> usize {
-    let i = cache.get(&first_day);
-    if i.is_some() {
-        return *i.unwrap();
+    match cache.get(&first_day) {
+        Some(i) => *i,
+        None => {
+            let x = produce(first_day);
+            let i = x.len() + x.iter().fold(0, |acc, &f| acc + reproduce(f, &mut cache));
+            cache.insert(first_day, i);
+            i
+        }
     }
-    let x = produce(first_day);
-    let i = x.len() + x.iter().map(|&f| reproduce(f, &mut cache)).sum::<usize>();
-    cache.insert(first_day, i);
-    i
 }
 
 fn main() -> std::io::Result<()> {
