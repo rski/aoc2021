@@ -1,4 +1,4 @@
-use std::fs::read_to_string;
+use std::{collections::BTreeSet, fs::read_to_string};
 
 fn aoc(s: &str) {
     let mut nums: Vec<Vec<u32>> = vec![];
@@ -23,7 +23,48 @@ fn aoc(s: &str) {
         }
     }
     let risk: u32 = basins.iter().map(|(row, i)| nums[*row][*i]).sum::<u32>() + basins.len() as u32;
-    dbg!(&basins, risk);
+    let mut basin_sizes: Vec<usize> = basins
+        .iter()
+        .map(|s| calc_basin(*s, l_size, &nums).len())
+        .collect::<Vec<usize>>();
+
+    basin_sizes.sort();
+    dbg!(basin_sizes.iter().rev().take(3).product::<usize>());
+    dbg!(risk);
+}
+
+fn calc_basin(
+    seed: (usize, usize),
+    l_size: usize,
+    points: &Vec<Vec<u32>>,
+) -> BTreeSet<(usize, usize)> {
+    let mut basin = BTreeSet::<(usize, usize)>::new();
+    basin.insert(seed);
+    let mut prev_set = basin.clone();
+    loop {
+        if prev_set.len() == 0 {
+            break;
+        }
+        for e in &prev_set {
+            basin.insert(*e);
+        }
+        let mut new_points = BTreeSet::<(usize, usize)>::new();
+        for p in &prev_set {
+            let neighbors = neighbors(p.0, p.1, l_size, points);
+            for n in &neighbors {
+                match n {
+                    None => {}
+                    Some(n) => {
+                        if points[n.0][n.1] != 9 && !basin.contains(n) {
+                            new_points.insert(*n);
+                        };
+                    }
+                }
+            }
+        }
+        prev_set = new_points;
+    }
+    basin
 }
 
 fn neighbors(
