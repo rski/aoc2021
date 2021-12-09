@@ -3,7 +3,6 @@ use std::{collections::BTreeSet, fs::read_to_string};
 fn aoc(s: &str) -> (usize, usize) {
     let mut nums: Vec<Vec<u32>> = vec![];
     for l in s.lines() {
-        dbg!(&l);
         let v: Vec<u32> = l.trim().chars().map(|c| c.to_digit(10).unwrap()).collect();
         nums.push(v);
     }
@@ -18,25 +17,24 @@ fn aoc(s: &str) -> (usize, usize) {
                 continue;
             }
             basins.push((row, i));
-            println!("line {} i {} number {} is min", i / l_size, i % l_size, n);
         }
     }
-    let risk: u32 = basins.iter().map(|(row, i)| nums[*row][*i]).sum::<u32>() + basins.len() as u32;
-    let mut basin_sizes = basins
+    let mut basin_sizes = Vec::<usize>::new();
+    let risk = basins
         .iter()
-        .map(|&s| calc_basin(s, l_size, &nums))
-        .collect::<Vec<usize>>();
+        .map(|(row, i)| {
+            basin_sizes.push(calc_basin((*row, *i), l_size, &nums));
+            nums[*row][*i]
+        })
+        .sum::<u32>() as usize
+        + basins.len();
 
     basin_sizes.sort();
-    (
-        risk as usize,
-        basin_sizes.iter().rev().take(3).product::<usize>(),
-    )
+    (risk, basin_sizes.iter().rev().take(3).product::<usize>())
 }
 
 fn calc_basin(seed: (usize, usize), l_size: usize, points: &Vec<Vec<u32>>) -> usize {
-    let mut basin = BTreeSet::<(usize, usize)>::new();
-    basin.insert(seed);
+    let mut basin = BTreeSet::<(usize, usize)>::from([seed]);
     let mut prev_set = basin.clone();
     loop {
         if prev_set.len() == 0 {
@@ -61,7 +59,6 @@ fn neighbors(row: usize, i: usize, l_len: usize, points: &Vec<Vec<u32>>) -> Vec<
     if row != 0 {
         n.push((row - 1, i));
     }
-
     if row + 1 != points.len() {
         n.push((row + 1, i));
     }
