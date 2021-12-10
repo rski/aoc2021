@@ -93,7 +93,7 @@ impl Point {
 impl FromStr for Point {
     type Err = ParseIntError;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let s: Vec<&str> = s.split(",").collect();
+        let s: Vec<&str> = s.split(',').collect();
         let a = s[0].parse::<u64>()?;
         let b = s[1].parse::<u64>()?;
         Ok(Point(a, b))
@@ -127,10 +127,7 @@ fn main() -> std::io::Result<()> {
     for l in lines.into_iter() {
         l.fill_grid(&mut grid);
     }
-    dbg!(grid
-        .values()
-        .filter(|v| **v >= 2)
-        .collect::<Vec<&u64>>()
-        .len());
+    let nums = grid.values().filter(|v| **v >= 2).count();
+    dbg!(nums);
     Ok(())
 }

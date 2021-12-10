@@ -4,7 +4,7 @@ fn aoc(positions: &str) {
     let mut max = 0;
     let mut min = u64::MAX;
     let nums: Vec<u64> = positions
-        .split(",")
+        .split(',')
         .map(|x| {
             let x = x.parse::<u64>().unwrap();
             if x < min {

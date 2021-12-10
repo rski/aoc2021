@@ -29,15 +29,15 @@ fn aoc(s: &str) -> (usize, usize) {
         .sum::<u32>() as usize
         + basins.len();
 
-    basin_sizes.sort();
+    basin_sizes.sort_unstable();
     (risk, basin_sizes.iter().rev().take(3).product::<usize>())
 }
 
-fn calc_basin(seed: (usize, usize), l_size: usize, points: &Vec<Vec<u32>>) -> usize {
+fn calc_basin(seed: (usize, usize), l_size: usize, points: &[Vec<u32>]) -> usize {
     let mut basin = BTreeSet::<(usize, usize)>::from([seed]);
     let mut prev_set = basin.clone();
     loop {
-        if prev_set.len() == 0 {
+        if prev_set.is_empty() {
             break;
         }
         let mut new_points = BTreeSet::<(usize, usize)>::new();
@@ -54,7 +54,7 @@ fn calc_basin(seed: (usize, usize), l_size: usize, points: &Vec<Vec<u32>>) -> us
     basin.len()
 }
 
-fn neighbors(row: usize, i: usize, l_len: usize, points: &Vec<Vec<u32>>) -> Vec<(usize, usize)> {
+fn neighbors(row: usize, i: usize, l_len: usize, points: &[Vec<u32>]) -> Vec<(usize, usize)> {
     let mut n = Vec::<(usize, usize)>::new();
     if row != 0 {
         n.push((row - 1, i));

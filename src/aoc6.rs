@@ -28,9 +28,8 @@ fn reproduce(first_day: i64, mut cache: &mut HashMap<i64, usize>) -> usize {
 fn main() -> std::io::Result<()> {
     let buffer = read_to_string(String::from("d6.in"))?;
     let state: Vec<i64> = buffer
-        .strip_suffix("\n")
-        .unwrap()
-        .split(",")
+        .trim()
+        .split(',')
         .map(|x| x.parse::<i64>().unwrap() - 6)
         .collect();
     println!("Initial state: {:?}", state);

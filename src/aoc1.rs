@@ -11,7 +11,7 @@ fn aoc1(w_size: usize) -> std::io::Result<()> {
 
     let mut prev_sum: i32 = window.iter().sum();
     let mut i = 0;
-    while let Some(x) = depths.next() {
+    for x in depths {
         window.remove(0);
         window.push(x);
         let s = window.iter().sum();

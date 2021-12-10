@@ -16,7 +16,7 @@ impl Debug for BingoBoard {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         for (i, n) in self.numbers.iter().enumerate() {
             if i % self.size == 0 {
-                write!(f, "\n")?;
+                writeln!(f)?;
             }
             match n {
                 Some(n) => write!(f, "\t{} ", n)?,
@@ -43,7 +43,7 @@ impl BingoBoard {
             winning_play: None,
         };
         for l in lines {
-            if l == "" {
+            if l.is_empty() {
                 break;
             }
             let vals: Vec<Option<u64>> = l
@@ -134,30 +134,30 @@ fn main() -> std::io::Result<()> {
     Ok(())
 }
 
-fn setup() -> Result<(Vec<u64>, Vec<Box<BingoBoard>>), std::io::Error> {
+fn setup() -> Result<(Vec<u64>, Vec<BingoBoard>), std::io::Error> {
     let buffer = read_to_string(String::from("d4.in"))?;
-    let mut lines = buffer.lines().into_iter();
+    let mut lines = buffer.lines();
     let plays: Vec<u64> = lines
         .next()
         .unwrap()
-        .split(",")
+        .split(' ')
         .map(|x| x.parse::<u64>().unwrap())
         .collect();
     dbg!(&plays);
     lines.next();
-    let mut boards: Vec<Box<BingoBoard>> = vec![];
+    let mut boards: Vec<BingoBoard> = vec![];
     loop {
         let b = BingoBoard::new(&mut lines);
         dbg!(&b);
         if b.size == 0 {
             break;
         }
-        boards.push(Box::new(b));
+        boards.push(b);
     }
     Ok((plays, boards))
 }
 
-fn play_bingo(plays: &Vec<u64>, boards: &mut Vec<Box<BingoBoard>>) {
+fn play_bingo(plays: &[u64], boards: &mut Vec<BingoBoard>) {
     for p in plays {
         println!("playing {}", p);
         for b in boards.iter_mut() {

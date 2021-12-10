@@ -14,7 +14,7 @@ fn aoc(s: &str) -> (u64, u64) {
             State::Incomplete(n) => completion_scores.push(n),
         }
     }
-    completion_scores.sort();
+    completion_scores.sort_unstable();
 
     (score, completion_scores[(completion_scores.len() / 2)])
 }

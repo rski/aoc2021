@@ -1,6 +1,6 @@
 use std::fs::read_to_string;
 
-fn get_numbers(b: &String) -> (Vec<u64>, u64) {
+fn get_numbers(b: &str) -> (Vec<u64>, u64) {
     let mut numbers: Vec<u64> = vec![];
     let mut width = None;
     for l in b.lines() {
@@ -27,14 +27,14 @@ fn get_numbers(b: &String) -> (Vec<u64>, u64) {
     (numbers, width.unwrap() as u64)
 }
 
-fn db(n: &Vec<u64>) {
+fn db(n: &[u64]) {
     for i in n.iter() {
         print!("{:08b}/{} ", i, i);
     }
     println!()
 }
 
-fn recursive_filter(numbers: &Vec<u64>, width: u64, flip: bool) -> u64 {
+fn recursive_filter(numbers: &[u64], width: u64, flip: bool) -> u64 {
     let mut n = numbers.to_vec();
     for i in 0..width {
         let pos = width - i - 1;
@@ -46,13 +46,8 @@ fn recursive_filter(numbers: &Vec<u64>, width: u64, flip: bool) -> u64 {
         let s: u64 = v.into();
         dbg!(s);
         db(&n);
-        n = n
-            .iter()
-            .filter(|&x| ((*x >> pos) & 1 == s))
-            .map(|&x| x)
-            .collect();
-        db(&n);
-        if n.len() <= 1 {
+        let n = n.iter().filter(|&x| ((*x >> pos) & 1 == s));
+        if n.count() <= 1 {
             break;
         }
     }
@@ -64,7 +59,7 @@ fn recursive_filter(numbers: &Vec<u64>, width: u64, flip: bool) -> u64 {
     n.pop().unwrap()
 }
 
-fn most_popular_bits_pattern(nums: &Vec<u64>, width: u64) -> Vec<bool> {
+fn most_popular_bits_pattern(nums: &[u64], width: u64) -> Vec<bool> {
     let mut vals: Vec<u64> = vec![];
 
     for i in 0..width {

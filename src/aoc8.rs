@@ -9,8 +9,8 @@ fn aoc(input: &str) {
     let mut vals = 0;
     for l in input.lines() {
         let mut sets = HashMap::<u64, BTreeSet<char>>::new();
-        let mut split = l.split("|");
-        let all_patterns = split.next().unwrap().trim().split(" ");
+        let mut split = l.split('|');
+        let all_patterns = split.next().unwrap().trim().split(' ');
         for pattern in all_patterns.clone() {
             let w = &pattern.chars().count();
             match width_to_number.get(w) {
@@ -58,7 +58,7 @@ fn aoc(input: &str) {
                 sets.insert(3, s);
             } else {
                 let six = sets.get(&6).unwrap();
-                if s.sub(&six).len() == 0 {
+                if s.sub(six).is_empty() {
                     sets.insert(5, s);
                 } else {
                     sets.insert(2, s);
@@ -69,7 +69,7 @@ fn aoc(input: &str) {
         for (k, v) in sets {
             rev_sets.insert(v, k);
         }
-        let output = split.next().unwrap().trim().split(" ");
+        let output = split.next().unwrap().trim().split(' ');
         let mut day_value: u64 = 0;
         for (i, pattern) in output.enumerate() {
             let mut s = BTreeSet::new();
