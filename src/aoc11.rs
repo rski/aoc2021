@@ -40,6 +40,19 @@ fn aoc(s: &str, steps: usize) -> u64 {
     exploded
 }
 
+fn aoc2(s: &str) -> u64 {
+    let mut nums = setup(s);
+    let line_len = nums[0].len();
+    let size = (nums.len() - 2) * (line_len - 2);
+    let mut i = 0;
+    loop {
+        i += 1;
+        if size as u64 == take_step(&mut nums, line_len) {
+            return i;
+        }
+    }
+}
+
 fn debug(nums: &Vec<Vec<Oct>>, line_len: usize) {
     for i in 1..nums.len() - 1 {
         for j in 1..line_len - 1 {
@@ -150,13 +163,9 @@ fn main() -> std::io::Result<()> {
     let flashes = aoc(input, 100);
     assert_eq!(flashes, 1652);
 
-    // let flashes = aoc(test, 10);
-
-    // let flashes = aoc(test, 100);
-    // assert_eq!(flashes, 1656);
-    // let buffer = read_to_string(String::from("d10.in"))?;
-    // let (score, ac) = aoc(buffer.trim());
-    // assert_eq!(score, 315693);
-    // assert_eq!(ac, 1870887234);
+    let ss = aoc2(test);
+    assert_eq!(ss, 195);
+    let ss = aoc2(input);
+    assert_eq!(ss, 220);
     Ok(())
 }
