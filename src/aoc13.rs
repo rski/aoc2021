@@ -1,8 +1,13 @@
-fn debug(nums: &Vec<Vec<u8>>) {
+use std::fs::read_to_string;
+
+fn debug(nums: &Vec<Vec<u8>>) -> usize {
     let mut s = String::new();
+
+    let mut pop_count = 0;
     for row in nums {
         for v in row {
             if *v == 1 {
+                pop_count += 1;
                 s.push('#');
             } else {
                 s.push('.');
@@ -10,18 +15,66 @@ fn debug(nums: &Vec<Vec<u8>>) {
         }
         s.push('\n');
     }
-    println!("{}", s);
+    if nums.len() <= 80 {
+        println!("{}", s);
+    }
+    pop_count
+}
+
+fn fold_along_y(nums: &mut Vec<Vec<u8>>, y: &str) {
+    let anchor = y.parse::<usize>().unwrap();
+    println!("y fold={}", anchor);
+    for i in 1..=anchor {
+        if anchor + 1 == nums.len() {
+            break;
+        }
+        if i > anchor {
+            break;
+        }
+        for j in 0..nums[anchor - i].len() {
+            nums[anchor - i][j] |= nums[anchor + 1][j];
+        }
+        nums.remove(anchor + 1);
+    }
+    nums.remove(anchor);
+    if anchor >= nums.len() {
+        for i in anchor + 1..nums.len() {
+            let v = nums.remove(i);
+            nums.insert(0, v);
+        }
+    }
 }
 
 fn fold_along_x(nums: &mut Vec<Vec<u8>>, x: &str) {
-    println!("todo: x={}", x);
+    let anchor = x.parse::<usize>().unwrap();
+    println!("x fold={}", anchor);
+    for i in 1..=anchor {
+        if anchor + 1 == nums[0].len() {
+            break;
+        }
+        if i > anchor {
+            break;
+        }
+        for n in nums.into_iter() {
+            // dbg!(anchor - i, anchor + 1);
+            n[anchor - i] |= n[anchor + 1];
+            n.remove(anchor + 1);
+        }
+    }
+    for n in nums.into_iter() {
+        n.remove(anchor);
+    }
+    if anchor >= nums.len() {
+        for i in anchor + 1..nums.len() {
+            for n in nums.into_iter() {
+                let v = n.remove(i);
+                n.insert(0, v);
+            }
+        }
+    }
 }
 
-fn fold_along_y(nums: &mut Vec<Vec<u8>>, x: &str) {
-    println!("todo: y={}", x);
-}
-
-fn aoc(input: &str) {
+fn aoc(input: &str) -> usize {
     let mut nums = Vec::<Vec<u8>>::new();
     let mut max_x = 0;
     let mut parsing_coordinates = true;
@@ -61,7 +114,7 @@ fn aoc(input: &str) {
             debug(&nums);
         }
     }
-    debug(&nums);
+    debug(&nums)
 }
 fn main() -> std::io::Result<()> {
     let test = "\
@@ -86,6 +139,19 @@ fn main() -> std::io::Result<()> {
 
 fold along y=7
 fold along x=5";
-    aoc(test);
+    let res = aoc(test);
+    assert_eq!(res, 16);
+    println!("test done");
+
+    let buffer = read_to_string(String::from("d13.in"))?;
+    let res = aoc(&buffer);
+    // ####.#..#...##.#..#..##..####.#..#.###..
+    // ...#.#..#....#.#..#.#..#.#....#..#.#..#.
+    // ..#..#..#....#.#..#.#..#.###..####.#..#.
+    // .#...#..#....#.#..#.####.#....#..#.###..
+    // #....#..#.#..#.#..#.#..#.#....#..#.#....
+    // ####..##...##...##..#..#.#....#..#.#....
+    // zujuafhp
+    assert_eq!(res, 96);
     Ok(())
 }
