@@ -1,9 +1,8 @@
-fn debug(nums: &[u32], max_x: usize) {
+fn debug(nums: &Vec<Vec<u8>>) {
     let mut s = String::new();
-    for n in nums {
-        for i in 0..=max_x {
-            let v = (n >> i) & 0x1;
-            if v == 1 {
+    for row in nums {
+        for v in row {
+            if *v == 1 {
                 s.push('#');
             } else {
                 s.push('.');
@@ -14,20 +13,27 @@ fn debug(nums: &[u32], max_x: usize) {
     println!("{}", s);
 }
 
-fn fold_along_x(nums: &mut Vec<u32>, x: &str) {
+fn fold_along_x(nums: &mut Vec<Vec<u8>>, x: &str) {
     println!("todo: x={}", x);
 }
-fn fold_along_y(nums: &mut Vec<u32>, x: &str) {
+
+fn fold_along_y(nums: &mut Vec<Vec<u8>>, x: &str) {
     println!("todo: y={}", x);
 }
 
 fn aoc(input: &str) {
-    let mut nums = Vec::<u32>::new();
+    let mut nums = Vec::<Vec<u8>>::new();
     let mut max_x = 0;
     let mut parsing_coordinates = true;
     for l in input.lines() {
         if l.is_empty() {
             parsing_coordinates = false;
+            for n in &mut nums {
+                while max_x >= n.len() {
+                    n.push(0);
+                }
+            }
+            debug(&nums);
             continue;
         }
         if parsing_coordinates {
@@ -35,12 +41,15 @@ fn aoc(input: &str) {
             let x = s.next().unwrap();
             let y = s.next().unwrap();
             while y >= nums.len() {
-                nums.push(0);
+                nums.push(Vec::<u8>::new());
             }
             if x > max_x {
                 max_x = x;
             }
-            nums[y] = nums[y] | (1 << x);
+            while max_x >= nums[y].len() {
+                nums[y].push(0);
+            }
+            nums[y][x] = 1;
         } else {
             match l.strip_prefix("fold along y=") {
                 None => match l.strip_prefix("fold along x=") {
@@ -49,9 +58,10 @@ fn aoc(input: &str) {
                 },
                 Some(y) => fold_along_y(&mut nums, y),
             }
+            debug(&nums);
         }
     }
-    debug(&nums, max_x);
+    debug(&nums);
 }
 fn main() -> std::io::Result<()> {
     let test = "\
