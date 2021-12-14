@@ -1,14 +1,13 @@
-use std::{collections::HashMap, fs::read_to_string};
+use std::{
+    collections::{BTreeSet, HashMap},
+    fs::read_to_string,
+    slice::SliceIndex,
+};
 
-fn count_pop(mutation: &str) -> u32 {
-    let mut pop = HashMap::<char, u32>::new();
-    for c in mutation.chars() {
-        let v = pop.get(&c).unwrap_or(&0) + 1;
-        pop.insert(c, v);
-    }
-    let mut min_v = u32::MAX;
+fn count_pop(count: &HashMap<char, u64>) -> u64 {
+    let mut min_v = u64::MAX;
     let mut max_v = 0;
-    for (_, v) in pop {
+    for (_, &v) in count {
         if v > max_v {
             max_v = v;
         }
@@ -16,13 +15,13 @@ fn count_pop(mutation: &str) -> u32 {
             min_v = v
         }
     }
-    println!("{}, {}", max_v, min_v);
-
+    dbg!(&count);
     max_v - min_v
 }
-fn mutate(input: &str, steps: u32) -> String {
+fn mutate(input: &str, steps: u64) -> u64 {
     let mut start = String::new();
-    let mut rules = HashMap::<&str, char>::new();
+    let mut rules = HashMap::<(char, char), char>::new();
+
     let mut parsing_rules = false;
     for l in input.lines() {
         if l.is_empty() {
@@ -33,28 +32,45 @@ fn mutate(input: &str, steps: u32) -> String {
             start = l.to_owned();
         } else {
             let mut split = l.split(' ');
-            let input = split.next().unwrap();
+            let mut input = split.next().unwrap().chars();
+            let (a, b) = (input.next().unwrap(), input.next().unwrap());
             split.next();
             let res = split.next().unwrap();
-            rules.insert(input, res.chars().next().unwrap());
+            rules.insert((a, b), res.chars().next().unwrap());
         }
     }
-    // dbg!(&rules);
+    let mut poly = HashMap::<(char, char), u64>::new();
+    let mut count = HashMap::<char, u64>::new();
+    for p in start.chars().zip(start.clone().chars().skip(1)) {
+        let e = poly.entry(p).or_insert(0);
+        *e += 1;
+    }
+    for k in start.chars() {
+        let e = count.entry(k).or_insert(0);
+        *e += 1;
+    }
+
     for _ in 0..steps {
-        let mut mutations = Vec::<char>::new();
-        for i in 0..start.len() - 1 {
-            let k = &start[i..i + 2];
-            match rules.get(k) {
-                None => panic!("error finding key {}", k),
-                Some(v) => mutations.push(*v),
-            };
+        let mut new_poly = HashMap::<(char, char), u64>::new();
+        for (pair, v) in poly.iter() {
+            match rules.get(pair) {
+                None => {
+                    new_poly.insert(*pair, *v);
+                }
+                Some(new) => {
+                    let e = new_poly.entry((pair.0, *new)).or_insert(0);
+                    *e += v;
+                    let e = new_poly.entry((*new, pair.1)).or_insert(0);
+                    *e += v;
+                    let e = count.entry(*new).or_insert(0);
+                    *e += v;
+                }
+            }
         }
-        // println!("{:?}", mutations);
-        for (i, m) in mutations.iter().enumerate() {
-            start.insert(i * 2 + 1, *m);
-        }
+        poly = new_poly;
     }
-    start
+    dbg!(&rules);
+    count_pop(&count)
 }
 fn main() -> std::io::Result<()> {
     let test = "\
@@ -76,19 +92,33 @@ BB -> N
 BC -> B
 CC -> N
 CN -> C";
-    let mutation = mutate(test, 4);
-    assert_eq!(
-        mutation,
-        String::from("NBBNBNBBCCNBCNCCNBBNBBNBBBNBBNBBCBHCBHHNHCBBCBHCB")
-    );
-    let mutation = mutate(test, 10);
-    let count = count_pop(&mutation);
-    assert_eq!(count, 1588);
+    dbg!(mutate(test, 1));
+    // let count = count_pop(&mutation);
+    c("NCNBCHB");
+    dbg!(mutate(test, 2));
+    // let count = count_pop(&mutation);
+    c("NBCCNBBBCBHCB");
+    dbg!(mutate(test, 3));
+    c("NBBBCNCCNBBNBNBBCHBHHBCHB");
+    dbg!(mutate(test, 4));
+    c("NBBNBNBBCCNBCNCCNBBNBBNBBBNBBNBBCBHCBHHNHCBBCBHCB");
+
+    let pop = mutate(test, 10);
+    assert_eq!(pop, 1588);
 
     let input = read_to_string("d14.in").unwrap();
-    let mutation = mutate(&input, 10);
-    let count = count_pop(&mutation);
-    assert_eq!(count, 2937);
-
+    let pop = mutate(&input, 10);
+    assert_eq!(pop, 2937);
+    let pop = mutate(&input, 40);
+    assert_eq!(pop, 2937);
     Ok(())
+}
+
+fn c(i: &str) {
+    let mut example = HashMap::<char, u64>::new();
+    for c in i.chars() {
+        let v = example.get(&c).unwrap_or(&0) + 1;
+        example.insert(c, v);
+    }
+    dbg!(&example);
 }
