@@ -110,7 +110,7 @@ CN -> C";
     let pop = mutate(&input, 10);
     assert_eq!(pop, 2937);
     let pop = mutate(&input, 40);
-    assert_eq!(pop, 2937);
+    assert_eq!(pop, 3390034818249);
     Ok(())
 }
 
