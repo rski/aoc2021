@@ -42,12 +42,10 @@ fn mutate(input: &str, steps: u64) -> u64 {
     let mut poly = HashMap::<(char, char), u64>::new();
     let mut count = HashMap::<char, u64>::new();
     for p in start.chars().zip(start.clone().chars().skip(1)) {
-        let e = poly.entry(p).or_insert(0);
-        *e += 1;
+        *poly.entry(p).or_insert(0) += 1;
     }
     for k in start.chars() {
-        let e = count.entry(k).or_insert(0);
-        *e += 1;
+        *count.entry(k).or_insert(0) += 1;
     }
 
     for _ in 0..steps {
@@ -58,12 +56,9 @@ fn mutate(input: &str, steps: u64) -> u64 {
                     new_poly.insert(*pair, *v);
                 }
                 Some(new) => {
-                    let e = new_poly.entry((pair.0, *new)).or_insert(0);
-                    *e += v;
-                    let e = new_poly.entry((*new, pair.1)).or_insert(0);
-                    *e += v;
-                    let e = count.entry(*new).or_insert(0);
-                    *e += v;
+                    *new_poly.entry((pair.0, *new)).or_insert(0) += v;
+                    *new_poly.entry((*new, pair.1)).or_insert(0) += v;
+                    *count.entry(*new).or_insert(0) += v;
                 }
             }
         }

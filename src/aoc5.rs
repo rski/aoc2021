@@ -19,24 +19,19 @@ impl Line {
         if self.0 .0 == self.1 .0 {
             let fmt = |y: u64| format!("{},{}", self.0 .0, y);
             for y in min(self.0 .1, self.1 .1)..=max(self.0 .1, self.1 .1) {
-                let p = fmt(y);
-                let prev_value = grid.get(&p).unwrap_or(&0) + 1;
-                grid.insert(p, prev_value);
+                *grid.entry(fmt(y)).or_insert(0) += 1;
             }
         } else if self.0 .1 == self.1 .1 {
             let fmt = |x: u64| format!("{},{}", x, self.0 .1);
             for x in min(self.0 .0, self.1 .0)..=max(self.0 .0, self.1 .0) {
-                let p = fmt(x);
-                let prev_value = grid.get(&p).unwrap_or(&0) + 1;
-                grid.insert(p, prev_value);
+                *grid.entry(fmt(x)).or_insert(0) += 1;
             }
         } else if self.0 .0 == self.1 .1 {
             let mut x = self.0 .0;
             let mut y = self.0 .1;
             loop {
                 let p = format!("{},{}", x, y);
-                let prev_value = grid.get(&p).unwrap_or(&0) + 1;
-                grid.insert(p, prev_value);
+                *grid.entry(p).or_insert(0) += 1;
                 if x == self.1 .0 {
                     break;
                 }
@@ -62,8 +57,7 @@ impl Line {
             let inc_y = self.0 .1 < self.1 .1;
             loop {
                 let p = format!("{},{}", x, y);
-                let prev_value = grid.get(&p).unwrap_or(&0) + 1;
-                grid.insert(p, prev_value);
+                *grid.entry(p).or_insert(0) += 1;
                 if x == self.1 .0 {
                     break;
                 }
